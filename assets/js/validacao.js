@@ -46,6 +46,14 @@ function mostraMensagemErro(input, tipoInput){
         };
     });
 
+    if(input.validity.valueMissing){
+        mensagem = 'O campo não pode estar vazio.'; 
+    };
+
+    if(!input.validity.valueMissing && input.validity.customError){
+        mensagem = validaDataNascimento(input);
+    };
+
     return mensagem;
 };
 
@@ -67,6 +75,8 @@ function validaDataNascimento(input){
     };
 
     input.setCustomValidity(mensagem);
+
+    return mensagem;
 };
 
 function maiorQue18(dataRecebida, dataAtual){
