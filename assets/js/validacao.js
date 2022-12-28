@@ -16,7 +16,8 @@ export function valida(input){
 
 const validadores = {
     dataNascimento:input => validaDataNascimento(input),
-    cpf:input => validaCPF(input)
+    cpf:input => validaCPF(input),
+    cep:input => buscaCEP(input)
 };
 
 function validaDataNascimento(input){
@@ -89,6 +90,20 @@ const mensagensErro = {
     cpf:{
         valueMissing: 'O campo CPF não pode estar vazio.',
         customError: 'CPF inválido.'
+    },
+    cep:{
+        valueMissing: 'O campo de CEP não pode estar vazio.',
+        patternMismatch: 'CEP inválido.',
+        customError: 'CEP inválido.'
+    },
+    logradouro:{
+        valueMissing: 'O campo Logradouro não pode estar vazio.'
+    },
+    cidade:{
+        valueMissing: 'O campo Cidade não pode estar vazio.'
+    },
+    estado:{
+        valueMissing: 'O campo Estado não pode estar vazio.'
     }
 };
 
@@ -158,4 +173,45 @@ function testaCPF(cpfFormatado){
     };
 
     return cpfValido;
+};
+
+function buscaCEP(input){
+    const cepFormatado = input.value.replace(/\D/g, '');
+    const url = `https://viacep.com.br/ws/${cepFormatado}/json/`;
+    const options = {
+        method: 'GET',
+        mode: 'cors',
+        headers:{
+            'content-type': 'aplication/json;charset=utf-8'
+        }
+    };
+
+    if(!input.validity.patternMismatch && !input.validity.valueMissing){
+        fetch(url, options).then(
+            response => response.json()
+        ).then(
+            data => {
+                if(data.erro){
+                    input.setCustomValidity('CEP inválido.');
+                    input.parentNode.classList.add('input-container--invalido');
+                    return;
+                }else{
+                    input.setCustomValidity('');
+                    input.parentNode.classList.remove('input-container--invalido');
+                    camposDoCEP(data);
+                    return;
+                };
+            }
+        )
+    };
+};
+
+function camposDoCEP(data){
+    const logradouro = document.querySelector('[data-tipo="logradouro"]');
+    const cidade = document.querySelector('[data-tipo="cidade"]');
+    const estado = document.querySelector('[data-tipo="estado"]');
+
+    logradouro.value = data.logradouro;
+    cidade.value = data.localidade;
+    estado.value = data.uf;
 };
